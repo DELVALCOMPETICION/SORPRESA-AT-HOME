@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Sorpresa — Drift Frutando & Carrera Hybrid</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600;800&display=swap');
+        .font-racing { font-family: 'Orbitron', sans-serif; }
+    </style>
+</head>
+<body class="bg-black text-slate-100 font-sans antialiased selection:bg-orange-500 selection:text-white min-h-screen">
+
+    <!-- CABECERA OFICIAL -->
+    <header class="bg-slate-950/90 backdrop-blur-md border-b border-red-600/30 sticky top-0 z-40">
+        <div class="max-w-5xl mx-auto px-4 h-20 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <!-- Escudo Drift Frutando -->
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-full border-2 border-orange-500 bg-black flex flex-col items-center justify-center shadow-lg shadow-orange-500/20 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-tr from-orange-600/30 to-transparent"></div>
+                        <span class="text-xs font-racing font-black text-white leading-none">DR<span class="text-orange-500">I</span>FT</span>
+                        <span class="text-[7px] font-bold text-orange-400 tracking-tighter">FRUTANDO</span>
+                    </div>
+                    <div>
+                        <span class="font-racing font-black tracking-wider text-sm md:text-base text-white uppercase block">DRIFT FRUTANDO</span>
+                        <p class="text-[10px] text-orange-400 font-bold uppercase tracking-wider">Drift & Hybrid Club Madrid</p>
+                    </div>
+                </div>
+
+                <div class="h-8 w-[1px] bg-slate-800 hidden sm:block"></div>
+
+                <!-- Emblema Carrera Hybrid -->
+                <div class="hidden sm:flex flex-col items-center bg-black px-3 py-1 rounded-xl border border-red-600/40 shadow-inner">
+                    <span class="font-black tracking-tighter text-white bg-red-600 px-2 py-0.2 rounded text-xs uppercase italic leading-tight">Carrera</span>
+                    <span class="font-racing font-black text-cyan-400 text-[10px] tracking-widest mt-0.5">HYBRID</span>
+                </div>
+            </div>
+
+            <!-- Botón Acceso Organización con Contraseña -->
+            <div class="flex items-center gap-2">
+                <button onclick="requestAdminAccess()" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-bold text-orange-400 transition cursor-pointer">
+                    ⚙️ Configurar Prueba (Org)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 py-8 space-y-6">
+
+        <!-- PANEL DE ORGANIZACIÓN (Protegido con contraseña: disfrutando) -->
+        <div id="admin-panel" class="hidden bg-slate-950 border-2 border-orange-500/50 rounded-3xl p-6 space-y-6 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div>
+                    <h2 class="font-racing text-base font-black text-orange-400 uppercase">Panel de Organización — Gestión Total</h2>
+                    <p class="text-xs text-slate-400">Configura la prueba, gestiona pilotos/coches y revisa o corrige los tiempos enviados.</p>
+                </div>
+                <button onclick="closeAdminPanel()" class="px-3 py-1.5 rounded-lg bg-slate-900 text-xs text-slate-300 hover:text-white font-bold cursor-pointer">Cerrar Panel ✕</button>
+            </div>
+
+            <!-- 1. Parámetros de la Prueba -->
+            <div class="space-y-3">
+                <h3 class="text-xs font-racing font-bold text-white uppercase tracking-wider">1. Parámetros Oficiales y Tiempo</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Título del Evento</label>
+                        <input id="admin-title" type="text" class="w-full p-2.5 bg-black border border-slate-700 rounded-xl text-white font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Duración del Intento (Minutos)</label>
+                        <input id="admin-duration" type="number" min="1" max="1440" class="w-full p-2.5 bg-black border border-slate-700 rounded-xl font-mono text-orange-400 font-bold" placeholder="Ej: 90, 120, 180">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Imagen Oficial del Circuito</label>
+                        <input type="file" accept="image/*" onchange="loadTrackImage(event)" class="w-full p-2 bg-black border border-slate-700 rounded-xl text-slate-300 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-orange-600 file:text-white cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Código de Pista Oficial</label>
+                        <input id="admin-track-code" type="text" class="w-full p-2.5 bg-black border border-slate-700 rounded-xl font-mono text-orange-400 font-bold uppercase">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Código de Ajustes Oficial</label>
+                        <input id="admin-setup-code" type="text" class="w-full p-2.5 bg-black border border-slate-700 rounded-xl font-mono text-white font-bold uppercase">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Vueltas Obligatorias</label>
+                        <input id="admin-laps" type="number" class="w-full p-2.5 bg-black border border-slate-700 rounded-xl font-mono text-white font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Boost</label>
+                        <select id="admin-boost" class="w-full p-2.5 bg-black border border-slate-700 rounded-xl text-white font-bold">
+                            <option value="ACTIVADO">ACTIVADO</option>
+                            <option value="DESACTIVADO">DESACTIVADO</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="saveAdminConfig()" class="w-full py-2.5 px-4 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-racing font-bold text-xs shadow-lg transition cursor-pointer">
+                            💾 Guardar Configuración
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Gestión de Pilotos y Coches (Sin tocar código) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-800">
+                <!-- Gestión Pilotos -->
+                <div class="bg-black/60 p-4 rounded-2xl border border-slate-800 space-y-3">
+                    <h3 class="text-xs font-racing font-bold text-white uppercase">2. Listado de Pilotos del Club (<span id="admin-pilot-count">0</span>)</h3>
+                    <div class="flex gap-2">
+                        <input id="new-pilot-input" type="text" placeholder="Nombre o dorsal (Ej: Marcos #22)" class="flex-1 px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white">
+                        <button onclick="addPilot()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl cursor-pointer">+ Añadir</button>
+                    </div>
+                    <div id="admin-pilots-list" class="max-h-36 overflow-y-auto space-y-1.5 pr-1"></div>
+                </div>
+
+                <!-- Gestión Coches -->
+                <div class="bg-black/60 p-4 rounded-2xl border border-slate-800 space-y-3">
+                    <h3 class="text-xs font-racing font-bold text-white uppercase">3. Marcas / Coches Permitidos (<span id="admin-car-count">0</span>)</h3>
+                    <div class="flex gap-2">
+                        <input id="new-car-input" type="text" placeholder="Nueva marca o categoría..." class="flex-1 px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white">
+                        <button onclick="addCar()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl cursor-pointer">+ Añadir</button>
+                    </div>
+                    <div id="admin-cars-list" class="max-h-36 overflow-y-auto space-y-1.5 pr-1"></div>
+                </div>
+            </div>
+
+            <!-- 3. Auditoría y Corrección de Resultados (Visible solo para Organización) -->
+            <div class="pt-4 border-t border-slate-800 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-racing font-bold text-amber-400 uppercase">4. Resultados Recibidos (Vista Completa Organización — Tiempos y Códigos)</h3>
+                    <button onclick="resetTimerForTesting()" class="text-[11px] text-slate-400 hover:text-white underline cursor-pointer">Reiniciar mi temporizador de prueba</button>
+                </div>
+                <div id="admin-submissions-list" class="space-y-2 text-xs">
+                    <p class="text-slate-500 italic">No hay resultados registrados todavía.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- BANNER PRINCIPAL DE LA PRUEBA SORPRESA (VISTA PILOTOS) -->
+        <div class="bg-gradient-to-br from-slate-950 via-slate-900 to-red-950/40 rounded-3xl border-2 border-red-600/40 p-6 md:p-8 shadow-2xl relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-80 h-80 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                <div class="space-y-3">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black bg-red-600/20 text-red-400 border border-red-600/30 font-racing tracking-wider">
+                        ⚡ CIRCUITO DE LA SEMANA — PRUEBA SORPRESA
+                    </div>
+                    <h1 id="display-title" class="text-2xl md:text-4xl font-racing font-black text-white tracking-wide">GRAN PREMIO MADRID — NURBURGREEN</h1>
+                    <p class="text-xs md:text-sm text-slate-300 max-w-xl">
+                        Compite en el trazado oficial. Tienes un plazo de <strong class="text-white">2 semanas</strong> para pulsar el botón de salida y completar tu intento único de <strong id="display-duration-text" class="text-orange-400">90 minutos</strong>.
+                    </p>
+                </div>
+
+                <div id="timer-box" class="hidden px-5 py-4 rounded-2xl border bg-black/80 border-red-500/50 text-red-400 shadow-xl flex items-center gap-3 shrink-0">
+                    <div>
+                        <div class="text-[10px] uppercase font-black tracking-wider text-slate-400">Tiempo restante de intento</div>
+                        <div id="countdown-display" class="font-racing font-black text-2xl text-white">01:30:00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANTALLA BLOQUEADA INICIAL -->
+            <div id="locked-view" class="mt-8 bg-black/60 backdrop-blur rounded-2xl p-8 text-center space-y-4 border border-slate-800">
+                <div class="text-4xl">🔒</div>
+                <div class="space-y-1 max-w-md mx-auto">
+                    <h3 class="font-racing font-bold text-base text-white">Trazado y Configuración Ocultos</h3>
+                    <p class="text-xs text-slate-400">
+                        Al pulsar el botón inferior se revelará la ficha del circuito y los códigos de ajuste, arrancando tu cuenta atrás personal de <span id="locked-duration-text">90 minutos</span>.
+                    </p>
+                </div>
+                <button onclick="startChallenge()" class="inline-flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-racing font-black text-sm rounded-xl transition shadow-lg shadow-red-600/40 cursor-pointer uppercase tracking-wider">
+                    🚀 ¡Comenzar Reto!
+                </button>
+            </div>
+
+            <!-- CONTENIDO REVELADO AL DESBLOQUEAR -->
+            <div id="unlocked-view" class="hidden mt-8 space-y-6 pt-6 border-t border-slate-800">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Ficha / Imagen Oficial del Circuito -->
+                    <div class="bg-black/80 rounded-2xl p-5 border border-slate-800 space-y-3 shadow-inner">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-orange-400 font-bold uppercase tracking-wider">Ficha Oficial del Circuito</span>
+                            <span class="px-2.5 py-0.5 rounded-full font-semibold text-[11px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">● Oficial</span>
+                        </div>
+                        <div id="track-image-container" class="h-48 bg-slate-900 rounded-xl border border-slate-800 flex items-center justify-center relative overflow-hidden">
+                            <div id="track-placeholder" class="text-center p-4 space-y-1">
+                                <span class="text-2xl block">🗺️</span>
+                                <span class="text-xs font-bold text-slate-300 block">Imagen del Circuito</span>
+                                <span class="text-[10px] text-slate-500 block">(Pendiente de subir imagen desde Organización)</span>
+                            </div>
+                            <img id="track-official-img" src="" alt="Circuito Oficial" class="hidden w-full h-full object-contain">
+                        </div>
+                    </div>
+
+                    <!-- Códigos y Botón de Subida -->
+                    <div class="space-y-4 flex flex-col justify-between">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="bg-black/60 p-4 rounded-xl border border-slate-800">
+                                <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 block mb-1">Código de Pista</span>
+                                <div class="flex items-center justify-between gap-2">
+                                    <code id="display-track-code" class="text-xs font-mono font-bold text-orange-400 break-all">BCB3CB2D4CBA</code>
+                                    <button onclick="copyText('display-track-code')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-[10px] font-bold text-slate-300 cursor-pointer">Copiar</button>
+                                </div>
+                            </div>
+                            <div class="bg-black/60 p-4 rounded-xl border border-slate-800">
+                                <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 block mb-1">Código de Ajustes</span>
+                                <div class="flex items-center justify-between gap-2">
+                                    <code id="display-setup-code" class="text-xs font-mono font-bold text-white break-all">AACDABBAAA</code>
+                                    <button onclick="copyText('display-setup-code')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-[10px] font-bold text-slate-300 cursor-pointer">Copiar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-black/60 p-4 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
+                            <div>
+                                <span class="text-slate-400 block">Vueltas requeridas: <strong id="display-laps" class="text-white">20</strong></span>
+                                <span class="text-slate-400 block mt-0.5">Boost: <strong id="display-boost" class="text-emerald-400">ACTIVADO</strong></span>
+                            </div>
+                            <button onclick="openModal()" class="px-5 py-3 rounded-xl font-racing font-black text-xs bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-600/30 transition cursor-pointer uppercase">
+                                📤 Subir Captura
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LISTADO DE PARTICIPANTES (TIEMPOS OCULTOS AL PÚBLICO) -->
+                <div class="bg-black/60 rounded-2xl p-5 border border-slate-800 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <h3 class="font-racing text-xs font-black uppercase tracking-wider text-slate-300">🏆 Pilotos Presentados (<span id="participant-count">0</span>)</h3>
+                        <span class="text-[11px] text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 font-semibold">
+                            🔒 Tiempos ocultos hasta el cierre de las 2 semanas
+                        </span>
+                    </div>
+                    <div id="participants-list" class="space-y-2">
+                        <p class="text-xs text-slate-500 italic py-2">Ningún piloto ha subido aún su resultado. ¡Sé el primero!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL DE SUBIDA DE CAPTURA -->
+    <div id="upload-modal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-950 border border-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div>
+                <h3 class="font-racing text-lg font-black text-white">Subir Captura y Validar Crono</h3>
+                <p class="text-xs text-slate-400 mt-0.5">Selecciona tu piloto, el coche y sube tu captura de resultados.</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- Selector Dinámico de Pilotos -->
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1.5">Piloto del Club</label>
+                        <select id="pilot-select" class="w-full px-3.5 py-2.5 rounded-xl bg-black border border-slate-700 text-xs text-white font-medium focus:outline-none focus:border-red-600"></select>
+                    </div>
+
+                    <!-- Selector Dinámico de Coches -->
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1.5">Coche Utilizado</label>
+                        <select id="car-select" class="w-full px-3.5 py-2.5 rounded-xl bg-black border border-slate-700 text-xs text-white font-medium focus:outline-none focus:border-red-600"></select>
+                    </div>
+                </div>
+
+                <!-- Subida de captura -->
+                <div class="p-4 border-2 border-dashed border-slate-700 rounded-2xl bg-black/60 text-center space-y-2">
+                    <p class="text-xs text-slate-300 font-medium">Sube la captura de pantalla de resultados:</p>
+                    <label class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-xl cursor-pointer transition shadow">
+                        📷 Seleccionar Captura (Lectura OCR)
+                        <input type="file" accept="image/*" class="hidden" onchange="simulateOCR()">
+                    </label>
+                </div>
+
+                <!-- Tiempos -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-black p-3 rounded-xl border border-slate-800 space-y-1">
+                        <span class="text-[10px] font-black uppercase text-slate-400 block">Tiempo Total</span>
+                        <div class="flex items-center gap-1 font-mono font-bold text-xs text-white">
+                            <input id="t-min" type="text" value="02" class="w-10 p-1 bg-slate-900 border border-slate-700 rounded text-center"> :
+                            <input id="t-sec" type="text" value="22" class="w-10 p-1 bg-slate-900 border border-slate-700 rounded text-center"> .
+                            <input id="t-ms" type="text" value="378" class="w-12 p-1 bg-slate-900 border border-slate-700 rounded text-center">
+                        </div>
+                    </div>
+                    <div class="bg-black p-3 rounded-xl border border-slate-800 space-y-1">
+                        <span class="text-[10px] font-black uppercase text-slate-400 block">Mejor Vuelta</span>
+                        <div class="flex items-center gap-1 font-mono font-bold text-xs text-white">
+                            <span>00:</span>
+                            <input id="l-sec" type="text" value="06" class="w-10 p-1 bg-slate-900 border border-slate-700 rounded text-center"> .
+                            <input id="l-ms" type="text" value="736" class="w-12 p-1 bg-slate-900 border border-slate-700 rounded text-center">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Códigos y Vueltas -->
+                <div class="grid grid-cols-3 gap-2 text-xs">
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Cód. Pista</label>
+                        <input id="c-pista" type="text" class="w-full p-2 bg-black border border-slate-700 rounded-lg font-mono font-bold text-white text-[11px] uppercase">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Cód. Ajustes</label>
+                        <input id="c-ajustes" type="text" class="w-full p-2 bg-black border border-slate-700 rounded-lg font-mono font-bold text-white text-[11px] uppercase">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Vueltas</label>
+                        <input id="c-vueltas" type="text" class="w-full p-2 bg-black border border-slate-700 rounded-lg font-mono font-bold text-white text-[11px] text-center">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3">
+                    <button onclick="closeModal()" class="px-4 py-2.5 rounded-xl border border-slate-700 text-xs font-bold text-slate-300 hover:bg-slate-900 transition cursor-pointer">Cancelar</button>
+                    <button onclick="submitResult()" class="px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-racing font-bold text-xs shadow-lg shadow-red-600/30 transition cursor-pointer">Validar y Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CONTRASEÑA ORGANIZACIÓN -->
+    <div id="password-modal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-950 border border-orange-500/40 rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
+            <h3 class="font-racing text-base font-black text-white">Acceso Organización</h3>
+            <p class="text-xs text-slate-400">Introduce la contraseña del club para abrir la configuración:</p>
+            <input id="org-password-input" type="password" placeholder="Contraseña..." onkeydown="if(event.key==='Enter') verifyAdminPassword()" class="w-full px-4 py-2.5 bg-black border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-orange-500">
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closePasswordModal()" class="px-4 py-2 rounded-xl border border-slate-700 text-xs font-bold text-slate-300 cursor-pointer">Cancelar</button>
+                <button onclick="verifyAdminPassword()" class="px-5 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs cursor-pointer">Entrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos por defecto (se guardan automáticamente en el navegador si los editas)
+        const DEFAULT_CONFIG = {
+            title: "GRAN PREMIO MADRID — NURBURGREEN",
+            durationMinutes: 90,
+            trackCode: "BCB3CB2D4CBA",
+            setupCode: "AACDABBAAA",
+            laps: "20",
+            boost: "ACTIVADO",
+            trackImage: ""
+        };
+
+        const DEFAULT_PILOTS = [
+            "Roberto (#71)", "Danyboy9 (#09)", "Carlos M. (#81)", "Hermano Del Val (#08)",
+            "Diego", "Javier", "Frank", "Yannik", "Tolga", "Tomás", "Daniel", "Lorenzo",
+            "Rubén", "Tobías", "Christian", "Luis M.", "Alberto G.", "Mario S.", "Sergio R.",
+            "Pablo V.", "Álvaro N.", "David P.", "Jorge L.", "Víctor M.", "Gonzalo K.",
+            "Mateo B.", "Hugo T.", "Lucas F.", "Adrián M.", "Ignacio C."
+        ];
+
+        const DEFAULT_CARS = ["Porsche", "Ferrari", "Ford", "BMW", "F1"];
+
+        let config = JSON.parse(localStorage.getItem('df_config')) || DEFAULT_CONFIG;
+        let pilots = JSON.parse(localStorage.getItem('df_pilots')) || DEFAULT_PILOTS;
+        let cars = JSON.parse(localStorage.getItem('df_cars')) || DEFAULT_CARS;
+        let submissions = JSON.parse(localStorage.getItem('df_submissions')) || [];
+
+        let challengeStarted = false;
+        let timeLeft = config.durationMinutes * 60;
+        let timerInterval = null;
+
+        // Inicializar interfaz al cargar
+        function initApp() {
+            syncConfigToUI();
+            renderDropdowns();
+            renderAdminLists();
+            renderParticipants();
+            renderAdminSubmissions();
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('df_config', JSON.stringify(config));
+            localStorage.setItem('df_pilots', JSON.stringify(pilots));
+            localStorage.setItem('df_cars', JSON.stringify(cars));
+            localStorage.setItem('df_submissions', JSON.stringify(submissions));
+        }
+
+        function syncConfigToUI() {
+            document.getElementById('display-title').innerText = config.title;
+            document.getElementById('display-track-code').innerText = config.trackCode;
+            document.getElementById('display-setup-code').innerText = config.setupCode;
+            document.getElementById('display-laps').innerText = config.laps;
+            document.getElementById('display-boost').innerText = config.boost;
+
+            const durText = formatDurationLabel(config.durationMinutes);
+            document.getElementById('display-duration-text').innerText = durText;
+            document.getElementById('locked-duration-text').innerText = durText;
+
+            if (!challengeStarted) {
+                timeLeft = config.durationMinutes * 60;
+                updateCountdownDisplay();
+            }
+
+            // Rellenar campos del admin
+            document.getElementById('admin-title').value = config.title;
+            document.getElementById('admin-duration').value = config.durationMinutes;
+            document.getElementById('admin-track-code').value = config.trackCode;
+            document.getElementById('admin-setup-code').value = config.setupCode;
+            document.getElementById('admin-laps').value = config.laps;
+            document.getElementById('admin-boost').value = config.boost;
+
+            // Rellenar modal de subida
+            document.getElementById('c-pista').value = config.trackCode;
+            document.getElementById('c-ajustes').value = config.setupCode;
+            document.getElementById('c-vueltas').value = config.laps;
+
+            if (config.trackImage) {
+                const img = document.getElementById('track-official-img');
+                img.src = config.trackImage;
+                img.classList.remove('hidden');
+                document.getElementById('track-placeholder').classList.add('hidden');
+            }
+        }
+
+        function formatDurationLabel(mins) {
+            if (mins % 60 === 0 && mins >= 60) {
+                const h = mins / 60;
+                return h === 1 ? "1 hora (60 min)" : `${h} horas (${mins} min)`;
+            }
+            return `${mins} minutos`;
+        }
+
+        // Control de Contraseña Organización
+        function requestAdminAccess() {
+            const panel = document.getElementById('admin-panel');
+            if (!panel.classList.contains('hidden')) {
+                panel.classList.add('hidden');
+                return;
+            }
+            document.getElementById('org-password-input').value = '';
+            document.getElementById('password-modal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('org-password-input').focus(), 100);
+        }
+
+        function closePasswordModal() {
+            document.getElementById('password-modal').classList.add('hidden');
+        }
+
+        function verifyAdminPassword() {
+            const pass = document.getElementById('org-password-input').value.trim().toLowerCase();
+            if (pass === 'disfrutando') {
+                closePasswordModal();
+                document.getElementById('admin-panel').classList.remove('hidden');
+            } else {
+                alert("❌ Contraseña incorrecta.");
+            }
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('admin-panel').classList.add('hidden');
+        }
+
+        // Guardar configuración desde Organización
+        function loadTrackImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                config.trackImage = e.target.result;
+                saveToStorage();
+                syncConfigToUI();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function saveAdminConfig() {
+            config.title = document.getElementById('admin-title').value.trim() || DEFAULT_CONFIG.title;
+            config.durationMinutes = parseInt(document.getElementById('admin-duration').value) || 90;
+            config.trackCode = document.getElementById('admin-track-code').value.trim().toUpperCase();
+            config.setupCode = document.getElementById('admin-setup-code').value.trim().toUpperCase();
+            config.laps = document.getElementById('admin-laps').value.trim();
+            config.boost = document.getElementById('admin-boost').value;
+
+            saveToStorage();
+            syncConfigToUI();
+            alert("✅ Configuración guardada y aplicada.");
+        }
+
+        // Gestión dinámica de Pilotos y Coches
+        function renderDropdowns() {
+            const pilotSelect = document.getElementById('pilot-select');
+            pilotSelect.innerHTML = pilots.map(p => `<option value="${p}">${p}</option>`).join('');
+
+            const carSelect = document.getElementById('car-select');
+            carSelect.innerHTML = cars.map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+
+        function renderAdminLists() {
+            document.getElementById('admin-pilot-count').innerText = pilots.length;
+            document.getElementById('admin-pilots-list').innerHTML = pilots.map((p, idx) => `
+                <div class="flex items-center justify-between px-3 py-1.5 bg-slate-900 rounded-lg text-xs">
+                    <span class="text-slate-200 font-medium">${p}</span>
+                    <button onclick="removePilot(${idx})" class="text-red-400 hover:text-red-300 font-bold cursor-pointer">✕</button>
+                </div>
+            `).join('');
+
+            document.getElementById('admin-car-count').innerText = cars.length;
+            document.getElementById('admin-cars-list').innerHTML = cars.map((c, idx) => `
+                <div class="flex items-center justify-between px-3 py-1.5 bg-slate-900 rounded-lg text-xs">
+                    <span class="text-slate-200 font-medium">${c}</span>
+                    <button onclick="removeCar(${idx})" class="text-red-400 hover:text-red-300 font-bold cursor-pointer">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function addPilot() {
+            const input = document.getElementById('new-pilot-input');
+            const name = input.value.trim();
+            if (!name) return;
+            pilots.push(name);
+            input.value = '';
+            saveToStorage();
+            renderDropdowns();
+            renderAdminLists();
+        }
+
+        function removePilot(index) {
+            pilots.splice(index, 1);
+            saveToStorage();
+            renderDropdowns();
+            renderAdminLists();
+        }
+
+        function addCar() {
+            const input = document.getElementById('new-car-input');
+            const car = input.value.trim();
+            if (!car) return;
+            cars.push(car);
+            input.value = '';
+            saveToStorage();
+            renderDropdowns();
+            renderAdminLists();
+        }
+
+        function removeCar(index) {
+            cars.splice(index, 1);
+            saveToStorage();
+            renderDropdowns();
+            renderAdminLists();
+        }
+
+        // Temporizador y Flujo Piloto
+        function updateCountdownDisplay() {
+            let h = String(Math.floor(timeLeft / 3600)).padStart(2, '0');
+            let m = String(Math.floor((timeLeft % 3600) / 60)).padStart(2, '0');
+            let s = String(timeLeft % 60).padStart(2, '0');
+            document.getElementById('countdown-display').innerText = `${h}:${m}:${s}`;
+        }
+
+        function startChallenge() {
+            challengeStarted = true;
+            timeLeft = config.durationMinutes * 60;
+            updateCountdownDisplay();
+
+            document.getElementById('locked-view').classList.add('hidden');
+            document.getElementById('unlocked-view').classList.remove('hidden');
+            document.getElementById('timer-box').classList.remove('hidden');
+
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    updateCountdownDisplay();
+                } else {
+                    clearInterval(timerInterval);
+                    alert("¡Tiempo del intento agotado!");
+                }
+            }, 1000);
+        }
+
+        function resetTimerForTesting() {
+            if (timerInterval) clearInterval(timerInterval);
+            challengeStarted = false;
+            timeLeft = config.durationMinutes * 60;
+            updateCountdownDisplay();
+            document.getElementById('locked-view').classList.remove('hidden');
+            document.getElementById('unlocked-view').classList.add('hidden');
+            document.getElementById('timer-box').classList.add('hidden');
+        }
+
+        function copyText(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text);
+            alert("Copiado: " + text);
+        }
+
+        function openModal() {
+            if (timeLeft <= 0) {
+                alert("Tu tiempo ha finalizado. Ya no puedes subir más intentos.");
+                return;
+            }
+            document.getElementById('upload-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('upload-modal').classList.add('hidden');
+        }
+
+        function simulateOCR() {
+            alert("📸 Captura leída por OCR: Verifica que los tiempos y códigos extraídos son correctos antes de guardar.");
+        }
+
+        function submitResult() {
+            let pista = document.getElementById('c-pista').value.trim().toUpperCase();
+            let ajustes = document.getElementById('c-ajustes').value.trim().toUpperCase();
+            let vueltas = document.getElementById('c-vueltas').value.trim();
+
+            const isValid = (pista === config.trackCode && ajustes === config.setupCode && vueltas === config.laps);
+
+            if (!isValid) {
+                const forceSave = confirm("⚠️ Atención: Los códigos o las vueltas no coinciden exactamente con los oficiales.\n\n¿Quieres enviarlo igualmente para que la Organización lo revise y valide manualmente?");
+                if (!forceSave) return;
+            }
+
+            let pilotName = document.getElementById('pilot-select').value;
+            let carModel = document.getElementById('car-select').value;
+            let totalTime = `${document.getElementById('t-min').value}:${document.getElementById('t-sec').value}.${document.getElementById('t-ms').value}`;
+            let bestLap = `00:${document.getElementById('l-sec').value}.${document.getElementById('l-ms').value}`;
+
+            submissions.push({
+                id: Date.now(),
+                name: pilotName,
+                car: carModel,
+                totalTime: totalTime,
+                bestLap: bestLap,
+                trackCode: pista,
+                setupCode: ajustes,
+                laps: vueltas,
+                valid: isValid,
+                submittedAt: new Date().toLocaleTimeString()
+            });
+
+            saveToStorage();
+            renderParticipants();
+            renderAdminSubmissions();
+            closeModal();
+
+            if (isValid) {
+                alert("✅ ¡Resultado validado y guardado! Tu crono permanece oculto hasta el cierre oficial.");
+            } else {
+                alert("📩 Resultado enviado en estado 'Pendiente de Revisión' por Organización.");
+            }
+        }
+
+        // Vista Pública (Sin tiempos visibles)
+        function renderParticipants() {
+            let list = document.getElementById('participants-list');
+            document.getElementById('participant-count').innerText = submissions.length;
+
+            if (submissions.length === 0) {
+                list.innerHTML = `<p class="text-xs text-slate-500 italic py-2">Ningún piloto ha subido aún su resultado. ¡Sé el primero!</p>`;
+                return;
+            }
+
+            list.innerHTML = submissions.map((p, idx) => `
+                <div class="flex items-center justify-between px-4 py-3 bg-black rounded-xl border border-slate-800 text-xs">
+                    <div class="flex items-center gap-3">
+                        <span class="font-mono font-bold text-slate-500">#${idx + 1}</span>
+                        <div>
+                            <span class="font-bold text-white text-sm">${p.name}</span>
+                            <span class="text-[10px] text-orange-400 block">${p.car}</span>
+                        </div>
+                    </div>
+                    <div class="text-slate-400 text-[11px] font-medium text-right">
+                        Enviado a las ${p.submittedAt}<br>
+                        ${p.valid
+                            ? `<span class="text-emerald-400 font-bold">● Validado OK</span>`
+                            : `<span class="text-amber-400 font-bold">● En revisión (Org)</span>`
+                        }
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Vista Privada Organización (Con tiempos, códigos y botones para corregir/validar)
+        function renderAdminSubmissions() {
+            const container = document.getElementById('admin-submissions-list');
+            if (submissions.length === 0) {
+                container.innerHTML = `<p class="text-slate-500 italic">No hay resultados registrados todavía.</p>`;
+                return;
+            }
+
+            container.innerHTML = submissions.map((s, idx) => `
+                <div class="p-3.5 bg-black rounded-xl border ${s.valid ? 'border-slate-800' : 'border-amber-500/50'} flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-white">${s.name}</span>
+                            <span class="px-2 py-0.5 rounded bg-slate-800 text-orange-400 text-[10px] font-bold">${s.car}</span>
+                            <span class="text-[10px] font-bold ${s.valid ? 'text-emerald-400' : 'text-amber-400'}">${s.valid ? '✔ VÁLIDO' : '⚠ REVISAR CÓDIGO'}</span>
+                        </div>
+                        <div class="text-[11px] text-slate-300 font-mono">
+                            Total: <strong class="text-white">${s.totalTime}</strong> | Vuelta Rápida: <strong class="text-cyan-400">${s.bestLap}</strong> | Vueltas: <strong>${s.laps}</strong>
+                        </div>
+                        <div class="text-[10px] text-slate-400 font-mono">
+                            Pista: <span class="${s.trackCode === config.trackCode ? 'text-emerald-400' : 'text-red-400 font-bold'}">${s.trackCode}</span> |
+                            Ajustes: <span class="${s.setupCode === config.setupCode ? 'text-emerald-400' : 'text-red-400 font-bold'}">${s.setupCode}</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="editSubmissionCodes(${idx})" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold cursor-pointer">✏️ Corregir Códigos</button>
+                        <button onclick="toggleSubmissionValid(${idx})" class="px-2.5 py-1.5 rounded-lg ${s.valid ? 'bg-amber-600/20 text-amber-400' : 'bg-emerald-600 text-white'} text-[11px] font-bold cursor-pointer">
+                            ${s.valid ? 'Marcar Revisión' : '✔ Validar Manual'}
+                        </button>
+                        <button onclick="deleteSubmission(${idx})" class="px-2.5 py-1.5 rounded-lg bg-red-600/20 hover:bg-red-600/40 text-red-400 text-[11px] font-bold cursor-pointer">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function editSubmissionCodes(index) {
+            const sub = submissions[index];
+            const newTrack = prompt("Modificar Código de Pista enviado:", sub.trackCode);
+            if (newTrack !== null) sub.trackCode = newTrack.trim().toUpperCase();
+
+            const newSetup = prompt("Modificar Código de Ajustes enviado:", sub.setupCode);
+            if (newSetup !== null) sub.setupCode = newSetup.trim().toUpperCase();
+
+            const newLaps = prompt("Modificar Vueltas:", sub.laps);
+            if (newLaps !== null) sub.laps = newLaps.trim();
+
+            sub.valid = (sub.trackCode === config.trackCode && sub.setupCode === config.setupCode && sub.laps === config.laps);
+            saveToStorage();
+            renderParticipants();
+            renderAdminSubmissions();
+        }
+
+        function toggleSubmissionValid(index) {
+            submissions[index].valid = !submissions[index].valid;
+            saveToStorage();
+            renderParticipants();
+            renderAdminSubmissions();
+        }
+
+        function deleteSubmission(index) {
+            if (!confirm("¿Eliminar este resultado?")) return;
+            submissions.splice(index, 1);
+            saveToStorage();
+            renderParticipants();
+            renderAdminSubmissions();
+        }
+
+        initApp();
+    </script>
+</body>
+</html>
